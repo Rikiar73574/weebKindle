@@ -35,7 +35,7 @@ Here's a more detailed workflow of what the Manga Subscription Bot would do behi
 ## Installation & Setup
 1. Clone the repository:
    ```sh
-   git clone <repository_url>
+   git clone https://github.com/Rikiar73574/weebKindle.git
    cd WeebKindle
    ```
 
