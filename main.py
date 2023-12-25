@@ -1,8 +1,11 @@
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler
+from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from dotenv import load_dotenv
 import os
 from Commands.commands import search, button_callback_handler
+from Helpers.Subscription.subscription_manager import handle_all_messages
+
+import Extensions.MangaDex.MangaDex
 
 # Load the environment variables from .env file and ensure BOT_TOKEN is present
 load_dotenv()
@@ -13,11 +16,15 @@ if TOKEN is None:
 # Initialize the application with the bot token and build it
 app = ApplicationBuilder().token(TOKEN).build()
 
-# Add handlers for commands and callback queries
+#COMMANDS
 app.add_handler(CommandHandler("search", search))
+
+
+#OTHER HANDLERS
+app.add_handler(MessageHandler(filters.ALL, handle_all_messages), group=1)
 app.add_handler(CallbackQueryHandler(button_callback_handler))
 
-# Begin polling for updates
+# POLLING
 app.run_polling()
 
 

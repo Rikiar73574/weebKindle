@@ -8,7 +8,7 @@ class PDFDownloader:
     def __init__(self, url):
         self.url = url
     
-    def download_pdf(self):
+    def download_pdf(self,compress=True):
         # Ensures the cache directory exists
         os.makedirs('pdf_cache', exist_ok=True)
 
@@ -23,9 +23,10 @@ class PDFDownloader:
             with open(filepath, 'wb') as pdf_file:
                 for chunk in response.iter_content(chunk_size=1024 * 1024):  # Read in 1MB chunks
                     pdf_file.write(chunk)
-            file_size_mb = os.path.getsize(filepath) / (1024 * 1024)
-            if file_size_mb > 25:
-                self.compress_pdf(filepath)
+            if compress:
+                file_size_mb = os.path.getsize(filepath) / (1024 * 1024)
+                if file_size_mb > 25:
+                    self.compress_pdf(filepath)
 
             return filepath
         else:

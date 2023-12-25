@@ -15,7 +15,7 @@ class LupiTeam:
         """
         # Construct the URL with the manga name query
         base_url = "https://lupiteam.net/api"
-        url = f"{base_url}"+"/search/"+f"{manga_name}"
+        url = f"{LupiTeam.base_url}"+"/search/"+f"{manga_name}"
 
         try:
             # Make a GET request to the API
@@ -31,9 +31,9 @@ class LupiTeam:
                     author=comic['author'],
                     thumbnail=comic['thumbnail'],
                     status=comic['status'],
-                    url=base_url + comic['url'],
+                    url=LupiTeam.base_url + comic['url'],
                     source="LupiTeam",
-                    last_chapter=base_url + comic['last_chapter']['pdf']
+                    last_chapter=LupiTeam.base_url + comic['last_chapter']['pdf']
                     )
                     normalized_comics.append(json.loads(normalized_json))  # Convert the JSON string back to a dict
             
