@@ -28,11 +28,7 @@ app.add_handler(CallbackQueryHandler(button_callback_handler))
 app.run_polling()
 
 
-##TEST MANGADEX
-#manga_results = MangaDex.search_manga('Naruto')
-#if manga_results is not None:
-#    for manga in manga_results:
-#        print(manga)
+
 
 
 
