@@ -4,6 +4,13 @@ import json
 # Define the path to the cache file
 cache_file_path = 'subscription_cache.json'
 
+async def handle_all_messages(update, context):
+        chat_id = str(update.message.chat_id)
+        username = update.message.from_user.username
+        SubscriptionManager.subscribe_user(chat_id, username)
+    
+
+
 class SubscriptionManager:
     @staticmethod
     def save_subscription_data(button_data):
@@ -49,37 +56,46 @@ class SubscriptionManager:
         return subscription_data
     
     @staticmethod
-    def subscribe_user(callback_data):
-        # Split the callback_data to get individual pieces of information
-        _, chat_id, username, source, title, last_chapter = callback_data.split("|")
-
-        # Load the existing subscription data from the file
+    def subscribe_user(chat_id, username):
+        # Load or initialize the subscription data
         try:
             with open(cache_file_path, 'r') as cache_file:
                 subscriptions = json.load(cache_file)
         except FileNotFoundError:
             subscriptions = {}
 
-        # If the chat_id doesn't exist in the subscription, initialize it
+        # Initialize the user if they don't exist in the subscription
         if chat_id not in subscriptions:
             subscriptions[chat_id] = {
                 'username': username,
                 'sources': {}
             }
 
+        # Write the updated subscription data back to the file
+        with open(cache_file_path, 'w') as cache_file:
+            json.dump(subscriptions, cache_file, indent=4)
+
+    @staticmethod
+    def add_title(chat_id, source, title, last_chapter):
+        # Assuming the user has been added by subscribe_user beforehand
+        
+        # Load the existing subscription data from the file
+        with open(cache_file_path, 'r') as cache_file:
+            subscriptions = json.load(cache_file)
+        
         # Initialize the source if it does not exist for the user
         if source not in subscriptions[chat_id]['sources']:
             subscriptions[chat_id]['sources'][source] = []
-        
+            
         titles_and_chapters = subscriptions[chat_id]['sources'][source]
         
-        # Check if the title already exists
+        # Check if the title already exists within the source
         for item in titles_and_chapters:
             if item['title'] == title:
-                #subscribe:1 fail title already present
-                return f"subscribe:1"
-        
-        # Since the title wasn't found, add it to the list
+                # Fail: Title already present
+                return "subscribe:1"
+
+        # Since the title wasn't found, add it along with the last chapter
         titles_and_chapters.append({
             'title': title,
             'last_chapter': last_chapter
@@ -88,6 +104,9 @@ class SubscriptionManager:
         # Write the updated subscription data back to the file
         with open(cache_file_path, 'w') as cache_file:
             json.dump(subscriptions, cache_file, indent=4)
-        #subscribe:0 title added
+        
+        # Success: Title added
         return "subscribe:0"
+
+    
 

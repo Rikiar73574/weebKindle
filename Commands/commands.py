@@ -38,13 +38,19 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
 
         
-        button_data=f"Subscribe|{update.effective_chat.id}|{update.effective_chat.effective_name}|{result['source']}|{result['title']}|{result['last_chapter']}"
-        subscription_id = SubscriptionManager.save_subscription_data(button_data)
+        subscription_data=f"Subscribe|{update.effective_chat.id}|{result['source']}|{result['title']}|{result['last_chapter']}"
+        download_data=f"Download|{update.effective_chat.id}|{result['last_chapter']}"
+        subscription_id = SubscriptionManager.save_subscription_data(subscription_data)
+        download_id= SubscriptionManager.save_subscription_data(download_data)
         subscribe_button = InlineKeyboardButton(
             text="Subscribe",
             callback_data=subscription_id
         )
-        reply_markup = InlineKeyboardMarkup([[subscribe_button]])
+        download_button = InlineKeyboardButton(
+            text="Download",
+            callback_data=download_id
+        )
+        reply_markup = InlineKeyboardMarkup([[subscribe_button,download_button]])
 
         
         await context.bot.send_photo(
@@ -63,13 +69,24 @@ async def button_callback_handler(update: Update, context: CallbackContext) -> N
     callback_data = SubscriptionManager.load_subscription_data(query.data)
 
     if callback_data.startswith("Subscribe|"):
-        _,chat_id, username, source, title, last_chapter = callback_data.split("|")
-        response = SubscriptionManager.subscribe_user(callback_data)
+        _, chat_id, source, title, last_chapter = callback_data.split("|")
+    
+        # Assuming subscribe_user method signature has been updated to include title,
+        # or if it still accepts the full callback_data for processing.
+        response = SubscriptionManager.add_title(chat_id, source, title, last_chapter)
+    
         match response:
             case "subscribe:0":
                 await context.bot.send_message(chat_id=chat_id, text="You have successfully subscribed!")
-                filepath=(PDFDownloader(last_chapter)).download_pdf()
-
+                filepath = (PDFDownloader(last_chapter)).download_pdf()
+                # You may want to do something with the downloaded PDF here
+    
             case "subscribe:1":
                 await context.bot.send_message(chat_id=chat_id, text="Already subscribed.")
+            
+    if callback_data.startswith("Download|"):
+        _, chat_id, last_chapter = callback_data.split("|")
+        filepath = (PDFDownloader(last_chapter)).download_pdf()
+        await context.bot.send_document(chat_id=chat_id, document=filepath)
+
 
